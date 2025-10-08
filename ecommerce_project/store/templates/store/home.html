@@ -1,0 +1,217 @@
+{% extends "store/base.html" %} 
+{% block title %}Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- Custom CSS for Glowing Icons --- */
+    
+    /* Variables for potential easy customization */
+    :root {
+        --glow-color: #007bff; /* Bootstrap Blue */
+        --glow-hover-color: #ffc107; /* Bootstrap Yellow/Warning */
+        --icon-size: 60px;
+        --text-color-dark: #343a40; /* Dark gray for text */
+    }
+
+    .feature-icon {
+        /* Container styling (circular shape, light background) */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--icon-size);
+        height: var(--icon-size);
+        border-radius: 50%;
+        font-size: 30px; 
+        background-color: #f8f9fa; /* Light background */
+        
+        /* The Glow Effect using multiple box-shadow layers */
+        box-shadow: 
+            0 0 10px rgba(0, 123, 255, 0.7), /* Standard Blue glow layer 1 */
+            0 0 20px rgba(0, 123, 255, 0.5), /* Standard Blue glow layer 2 */
+            0 0 30px rgba(0, 123, 255, 0.3); /* Standard Blue glow layer 3 */
+        
+        transition: all 0.3s ease-in-out; /* Smooth transition for hover */
+    }
+
+    .feature-icon:hover {
+        /* Enhanced Glow on Hover */
+        box-shadow: 
+            0 0 15px var(--glow-hover-color), /* Yellow/Warning glow layer 1 */
+            0 0 25px rgba(255, 193, 7, 0.8),
+            0 0 40px rgba(255, 193, 7, 0.6);
+        cursor: pointer;
+    }
+
+    .feature-text {
+        font-size: 0.9rem;
+        color: var(--text-color-dark) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel" >
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="https://img.freepik.com/premium-photo/ultra-hd-laptop-wallpaper-4k-collection_1046319-87599.jpg" class="d-block w-100" alt="Slide 1">
+        </div>
+        <div class="carousel-item">
+            <img src="https://img.freepik.com/premium-photo/template-mockup-mockup-templates-best-template-mockup-custom-template-mockup-mockup-template-gen_980716-35254.jpg" class="d-block w-100" alt="Slide 2">
+        </div>
+        <div class="carousel-item">
+            <img src="https://tse2.mm.bing.net/th/id/OIP.eqaWMFlBv9wSwgcL86dd8wHaE7?cb=12&w=626&h=417&rs=1&pid=ImgDetMain&o=7&rm=3" class="d-block w-100" alt="Slide 3">
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<div class="container py-5 my-2" style="background-color: #aaa; border-color: #aaa;" >
+    <div class="row">
+        <div class="col text-center my-4">
+            <h1 class="display-5 fw-bold">Welcome to My Shop</h1>
+            <p class="lead text-muted">Your one-stop shop for all your needs!</p>
+            <h2 class="mt-4 mb-1 text-uppercase">NO RISK SHOPPING</h2>
+            <p class="small text-secondary">ON THE GO OR FROM YOUR HOME</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mb-5">
+        
+        <div class="col-6 col-md-3 text-center feature-item py-3">
+            <div class="feature-icon mb-2">🚚</div>
+            <div class="feature-text">Free delivery all over India</div>
+        </div>
+
+        <div class="col-6 col-md-3 text-center feature-item py-3">
+            <div class="feature-icon mb-2">📦</div>
+            <div class="feature-text">Easy 7 days return</div>
+        </div>
+
+        <div class="col-6 col-md-3 text-center feature-item py-3">
+            <div class="feature-icon mb-2">🏷️</div>
+            <div class="feature-text">Curated Selection</div>
+        </div>
+
+        <div class="col-6 col-md-3 text-center feature-item py-3">
+            <div class="feature-icon mb-2">💳</div>
+            <div class="feature-text">Secure Transaction</div>
+        </div>
+        
+    </div>
+</div>
+
+<section class="container py-4">
+    <h2 class="text-center mb-4">Shop by Category</h2>
+    <div class="row text-center">
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="https://tse2.mm.bing.net/th/id/OIP.M9FRGmvHfd0I8qYcgRKbTwHaHa?cb=12&w=1024&h=1024&rs=1&pid=ImgDetMain&o=7&rm=3" class="card-img-top" alt="Laptop">
+                <div class="card-body">
+                    <h5 class="card-title">Laptop</h5>
+                    <a href="{% url 'store:product_list' %}?category=laptops" class="btn btn-outline-dark btn-sm">Explore</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="https://tse1.mm.bing.net/th/id/OIP.3NDwoniyWc911BwmskYIKwHaE8?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3" class="card-img-top" alt="Mobiles">
+                <div class="card-body">
+                    <h5 class="card-title">Mobiles</h5>
+                    <a href="{% url 'store:product_list' %}?category=mobiles" class="btn btn-outline-dark btn-sm">Explore</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="https://tse3.mm.bing.net/th/id/OIP.aeF6na5Eaf0PxnAtnMvTkAAAAA?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3" class="card-img-top" alt="Airpods">
+                <div class="card-body">
+                    <h5 class="card-title">Airpods</h5>
+                    <a href="{% url 'store:product_list' %}?category=airpods" class="btn btn-outline-dark btn-sm">Explore</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="https://img.freepik.com/premium-photo/laptop-accessories_1067349-10603.jpg" class="card-img-top" alt="Accessories">
+                <div class="card-body">
+                    <h5 class="card-title">Accessories</h5>
+                    <a href="{% url 'store:product_list' %}?category=accessories" class="btn btn-outline-dark btn-sm">Explore</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <h2 class="text-center mb-4">Featured Products</h2>
+    <div class="row">
+        {% for product in products|slice:":4" %}
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="text-muted mb-2">${{ product.price }}</p>
+                    <a href="{% url 'store:product_detail' product.id %}" class="btn btn-primary">View</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="https://img.freepik.com/premium-photo/bluetooth-headset-isolated-white-background_662093-528.jpg" class="card-img-top" alt="Jeans">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Bluetooth Headphone</h5>
+                    <p class="text-muted">$49.99</p>
+                    <a href="#" class="btn btn-primary btn-sm">View</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="https://d.newsweek.com/en/full/1719722/hidratespark-3.jpg" class="card-img-top" alt="Shirt">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Smart Waterbottle</h5>
+                    <p class="text-muted">$35.00</p>
+                    <a href="#" class="btn btn-primary btn-sm">View</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="https://tse4.mm.bing.net/th/id/OIP.cxxOf-fA7Q_Z6pJ-B2YBBwHaEK?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3" class="card-img-top" alt="Shoes">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Smart Watch</h5>
+                    <p class="text-muted">$89.99</p>
+                    <a href="#" class="btn btn-primary btn-sm">View</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="https://i5.walmartimages.com/asr/706d88b5-db85-487d-9812-dbb8f7c4d207.d7cfadc2faeed90361731bb45d2e1dbd.jpeg" class="card-img-top" alt="Watch">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Blueray Glass</h5>
+                    <p class="text-muted">$199.00</p>
+                    <a href="#" class="btn btn-primary btn-sm">View</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}
