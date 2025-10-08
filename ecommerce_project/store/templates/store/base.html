@@ -62,10 +62,10 @@
               </li>
               <li>
                 <a class="nav-link text-dark" href="{% url 'store:cart_detail' %}">
-                  Cart ({{ cart|length }})
+                  Cart
                 </a>
               </li>
-              <li><a class="nav-link text-dark" href="#">Wishlist</a></li>
+              <li><a class="nav-link text-dark" href="{% url 'store:wishlist_detail' %}">Wishlist</a></li>
             </ul>
           </div>
         </div>

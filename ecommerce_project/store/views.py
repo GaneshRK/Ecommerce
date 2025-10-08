@@ -122,19 +122,30 @@ def product_list(request):
 
 # Product detail
 def product_detail(request, id):
-    # Retrieve the product with the provided ID
-    product = Product.objects.get(id=id)
-    return render(request, 'store/product_detail.html', {'product': product})
+    product = get_object_or_404(Product, id=id)
+    cart = Cart(request)
+
+    cart_items = [item['product'].id for item in cart]
+    wishlist_items = [item['product'].id for item in cart.iter_wishlist()]  # ✅ get wishlist product ids
+
+    return render(request, 'store/product_detail.html', {
+        'product': product,
+        'cart_items': cart_items,
+        'wishlist_items': wishlist_items,
+    })
+
 
 # Cart views
 @require_POST
 def cart_add(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
-    qty = int(request.POST.get('quantity', 1))
-    cart.add(product=product, quantity=qty, update_quantity=False)
-    messages.success(request, f"Added {product.name} to cart")
-    return redirect('store:cart_detail')
+    cart.add(product=product, quantity=1, update_quantity=False)
+    
+    # Show success message for "Add to Cart"
+    messages.success(request, f"Added {product.name} to cart.")
+    
+    return redirect('store:product_detail', id=product.id)
 
 
 def cart_remove(request, product_id):
@@ -194,3 +205,42 @@ def order_detail(request, order_id):
         messages.error(request, 'You cannot view this order.')
         return redirect('store:product_list')
     return render(request, 'store/order_detail.html', {'order': order})
+
+@require_POST
+def wishlist_toggle(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    
+    product_id_str = str(product.id)
+    
+    if product_id_str in cart.wishlist:
+        cart.remove_from_wishlist(product)
+    else:
+        cart.add_to_wishlist(product)
+    
+    return redirect('store:product_detail', id=product.id)
+
+def wishlist_remove(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    cart.remove_from_wishlist(product)  # ✅ Remove item from wishlist
+    return redirect('store:wishlist_detail')  # ✅ Redirect to wishlist page
+
+# View Wishlist
+def wishlist_detail(request):
+    cart = Cart(request)
+    wishlist_items = list(cart.iter_wishlist())  # 👈 MAKE SURE THIS IS A LIST
+    return render(request, 'store/wishlist_detail.html', {
+        'wishlist': wishlist_items
+    })
+
+
+def buy_now(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Adding the product to the cart with quantity = 1 (or you can get it from the request)
+    cart.add(product=product, quantity=1, update_quantity=False)
+    
+    # Redirecting to checkout page immediately
+    return redirect('store:checkout')
