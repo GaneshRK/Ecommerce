@@ -3,12 +3,11 @@
 
 {% block content %}
 <style>
-  /* Inside your CSS file or in <style> tag */
 
 .btn-block {
   display: block;
   width: 100%;
-  margin-bottom: 10px; /* Adds space between buttons */
+  margin-bottom: 10px; 
 }
 
 </style>
@@ -22,32 +21,26 @@
     <p>{{ product.description }}</p>
     <h4>${{ product.price }}</h4>
 
-    <!-- Add to Cart Button -->
     <form action="{% url 'store:cart_add' product.id %}" method="post" class="mb-2">
       {% csrf_token %}
       <button type="submit" class="btn btn-success btn-block">
-        {% if product.id in cart_items %}
+        {% if product.id|stringformat:"s" in cart_items %}
           Added to Cart
         {% else %}
           Add to Cart
         {% endif %}
       </button>
     </form>
-
-    <!-- Add to Wishlist Button -->
     <form action="{% url 'store:wishlist_toggle' product.id %}" method="post" class="mb-2">
       {% csrf_token %}
       <button type="submit" class="btn btn-outline-primary btn-block">
-        {% if product.id in wishlist_items %}
+        {% if product.id|stringformat:"s" in wishlist_items %}
           Added to Wishlist
         {% else %}
           Add to Wishlist
         {% endif %}
       </button>
     </form>
-
-
-    <!-- Buy Now Button -->
     <form action="{% url 'store:buy_now' product.id %}" method="post">
       {% csrf_token %}
       <button type="submit" class="btn btn-warning btn-block">Buy Now</button>

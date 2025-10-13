@@ -6,8 +6,6 @@
 {% block content %}
 <div class="container-fluid mt-4">
   <div class="row">
-    
-    <!-- LEFT FILTER SIDEBAR -->
     <div class="col-md-3">
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
@@ -15,8 +13,6 @@
         </div>
         <div class="card-body">
           <form method="get" action="{% url 'store:product_list' %}">
-            
-            <!-- Category Filter -->
             <h6 class="fw-bold mb-3">Categories</h6>
             {% for cat in categories %}
               <div class="form-check">
@@ -34,10 +30,7 @@
                 All
               </label>
             </div>
-            
             <hr>
-
-            <!-- Price Filter -->
             <h6 class="fw-bold mt-3">Price Range</h6>
             <div class="mb-2">
               <label for="min_price" class="form-label">Min</label>
@@ -58,7 +51,6 @@
       </div>
     </div>
 
-    <!-- RIGHT PRODUCT LIST -->
     <div class="col-md-9">
       <h3 class="mb-4 text-center">
         {% if selected_category %}

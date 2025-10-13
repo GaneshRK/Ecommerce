@@ -2,34 +2,26 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
-
 User = get_user_model()
-
 class RegisterData(models.Model):
     name = models.CharField(max_length=30, default='')
     email = models.EmailField(max_length=100, default='')
     number = models.CharField(max_length=15, default='')  # Use CharField for phone numbers
     username = models.CharField(max_length=20, default='')
     password = models.CharField(max_length=20, default='')
-
     def __str__(self):
         return self.username
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
-
     class Meta:
         verbose_name_plural = 'Categories'
-
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-
     def __str__(self):
         return self.name
-    
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     name = models.CharField(max_length=255)
@@ -41,14 +33,10 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-
-
     def __str__(self):
         return self.name
 

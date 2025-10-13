@@ -3,18 +3,14 @@
 
 {% block extra_css %}
 <style>
-    /* --- Custom CSS for Glowing Icons --- */
-    
-    /* Variables for potential easy customization */
     :root {
-        --glow-color: #007bff; /* Bootstrap Blue */
-        --glow-hover-color: #ffc107; /* Bootstrap Yellow/Warning */
+        --glow-color: #007bff;
+        --glow-hover-color: #ffc107;
         --icon-size: 60px;
-        --text-color-dark: #343a40; /* Dark gray for text */
+        --text-color-dark: #343a40; 
     }
 
     .feature-icon {
-        /* Container styling (circular shape, light background) */
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -22,21 +18,18 @@
         height: var(--icon-size);
         border-radius: 50%;
         font-size: 30px; 
-        background-color: #f8f9fa; /* Light background */
-        
-        /* The Glow Effect using multiple box-shadow layers */
+        background-color: #f8f9fa; 
         box-shadow: 
-            0 0 10px rgba(0, 123, 255, 0.7), /* Standard Blue glow layer 1 */
-            0 0 20px rgba(0, 123, 255, 0.5), /* Standard Blue glow layer 2 */
-            0 0 30px rgba(0, 123, 255, 0.3); /* Standard Blue glow layer 3 */
+            0 0 10px rgba(0, 123, 255, 0.7),
+            0 0 20px rgba(0, 123, 255, 0.5),
+            0 0 30px rgba(0, 123, 255, 0.3); 
         
-        transition: all 0.3s ease-in-out; /* Smooth transition for hover */
+        transition: all 0.3s ease-in-out; 
     }
 
     .feature-icon:hover {
-        /* Enhanced Glow on Hover */
         box-shadow: 
-            0 0 15px var(--glow-hover-color), /* Yellow/Warning glow layer 1 */
+            0 0 15px var(--glow-hover-color),
             0 0 25px rgba(255, 193, 7, 0.8),
             0 0 40px rgba(255, 193, 7, 0.6);
         cursor: pointer;

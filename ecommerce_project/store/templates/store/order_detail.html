@@ -1,0 +1,45 @@
+{% extends "store/base.html" %}
+{% block content %}
+<div class="container mt-5" style="margin-bottom: 70px;">
+    <h2>Your Orders</h2>
+    {% if orders %}
+        <ul class="list-group">
+            {% for order in orders %}
+                <li class="list-group-item">
+                    <h4>Order #{{ order.id }}</h4>
+                    <p><strong>Status:</strong> {{ order.status }}</p>
+                    <p><strong>Total:</strong> ₹{{ order.total }}</p>
+                    <p><strong>Date Placed:</strong> {{ order.created_at }}</p>
+
+                    {% if order.status != 'cancelled' %}
+                    <form method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" name="cancel_order" value="{{ order.id }}" class="btn btn-danger">Cancel Order</button>
+                    </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no orders yet.</p>
+    {% endif %}
+
+    {% if current_order %}
+    <hr>
+    <h3>Current Order Details</h3>
+    <p><strong>Name:</strong> {{ current_order.full_name }}</p>
+    <p><strong>Email:</strong> {{ current_order.email }}</p>
+    <p><strong>Phone:</strong> {{ current_order.phone }}</p>
+    <p><strong>Address:</strong> {{ current_order.address }}</p>
+    <p><strong>Status:</strong> {{ current_order.status }}</p>
+    <p><strong>Total:</strong> ₹{{ current_order.total }}</p>
+
+    <h4>Items:</h4>
+    <ul>
+        {% for item in current_order.items.all %}
+            <li>{{ item.product.name }} — {{ item.quantity }} x ₹{{ item.price }} = ₹{{ item.total_price }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

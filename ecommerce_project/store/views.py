@@ -1,175 +1,126 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
-import re
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login,logout
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from httpcore import request
-from .models import Product, Category, Order, OrderItem,RegisterData
-from .forms import CustomUserForm, CheckoutForm
+from .models import Product, Category, Order, OrderItem
+from .forms import RegisterForm, CheckoutForm
 from .cart import Cart
 
 def home(request):
-    products = Product.objects.all()[:8]  # show top 8 items on home
+    products = Product.objects.all()[:8] 
     return render(request, 'store/home.html', {'products': products})
-
 def register(request):
     if request.method == 'POST':
-        # Retrieve data from the form
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        number = request.POST.get('number')
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        # Email validation for Gmail format
-        email_regex = r'^[a-zA-Z0-9_.+-]+@gmail\.com$'
-        
-        if not re.match(email_regex, email):
-            # If the email is not a valid Gmail address, silently return the form
-            return render(request, 'store/login.html', {'show_register': True, 'error': 'Please enter a valid Gmail address.'})
-
-        # Save to the custom RegisterData model if the email is valid
-        try:
-            # Check if username already exists
-            if RegisterData.objects.filter(username=username).exists():
-                return render(request, 'store/login.html', {'show_register': True, 'error': 'Username already taken.'})
-            
-            # Check if email already exists
-            if RegisterData.objects.filter(email=email).exists():
-                return render(request, 'store/login.html', {'show_register': True, 'error': 'Email already registered.'})
-
-            # Create new user in the RegisterData model
-            new_user = RegisterData.objects.create(
-                name=name,
-                email=email,
-                number=number,
-                username=username,
-                password=password
-            )
-            return redirect('login')  # Redirect to login page after successful registration
-
-        except Exception as e:
-            print("Error:", e)
-            return render(request, 'store/register.html', {'show_register': True, 'error': 'An error occurred. Please try again.'})
-
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            hashed_password = make_password(password)
+            try:
+                if User.objects.filter(username=username).exists():
+                    messages.error(request, "Username is already taken.")
+                    return render(request, 'store/register.html', {'form': form})
+                if User.objects.filter(email=email).exists():
+                    messages.error(request, "Email is already registered.")
+                    return render(request, 'store/register.html', {'form': form})
+                user = User.objects.create(
+                    username=username,
+                    email=email,
+                    password=hashed_password
+                )
+                user.save()
+                login(request, user) 
+                messages.success(request, "Registration successful! You are now logged in.")
+                return redirect('store:home') 
+            except Exception as e:
+                print("Error:", e)
+                messages.error(request, "An error occurred during registration. Please try again.")
+                return render(request, 'store/register.html', {'form': form})
+        else:
+            messages.error(request, "Please correct the errors below.")
+            return render(request, 'store/register.html', {'form': form})
     else:
-        return render(request, 'store/register.html', {'show_register': True})
-
-
+        form = RegisterForm()
+    return render(request, 'store/register.html', {'form': form})
 def login_page(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-
-        try:
-            # Check if user exists with the provided email or username
-            user = RegisterData.objects.get(username=username)
-        except RegisterData.DoesNotExist:
-            user = None
-
-        if user is not None and user.password == password:
-            # Simulate login
-            return redirect('home')
+        print(f"Attempting login for user: {username}") 
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            print(f"Login successful for user: {username}") 
+            login(request, user)
+            return redirect('store:home')
         else:
+            print(f"Login failed for user: {username}") 
             return render(request, 'store/login.html', {'error': 'Invalid Username or Password...'})
-
     return render(request, 'store/login.html')
-
-
 def logout_page(request):
     if request.user.is_authenticated:
         logout(request)
-    return redirect('store/home')
-
-
-# Product listing
-
-
+    return redirect('store:home')
 def product_list(request):
     categories = Category.objects.all()
-    products = Product.objects.filter(is_active=True)  # only active products
-
-    # Get filters from query parameters
+    products = Product.objects.filter(is_active=True)  
     category_slug = request.GET.get('category')
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
-
-    # CATEGORY FILTER
     selected_category = None
     if category_slug:
         if category_slug == 'new-arrivals':
-            products = products.order_by('-created_at')  # latest products
+            products = products.order_by('-created_at')  
         elif category_slug == 'festive-sale':
-            products = products.filter(is_on_sale=True)  # requires is_on_sale field
+            products = products.filter(is_on_sale=True) 
         else:
-            # Safe filter: return None if slug not found
             selected_category = Category.objects.filter(slug=category_slug).first()
             if selected_category:
                 products = products.filter(category=selected_category)
-
-    # PRICE FILTER
     if min_price:
         products = products.filter(price__gte=min_price)
     if max_price:
         products = products.filter(price__lte=max_price)
-
     context = {
         'categories': categories,
         'products': products,
-        'selected_category': category_slug  # for template highlighting
+        'selected_category': category_slug 
     }
     return render(request, 'store/product_list.html', context)
-
-# Product detail
-def product_detail(request, id):
-    product = get_object_or_404(Product, id=id)
-    cart = Cart(request)
-
-    cart_items = [item['product'].id for item in cart]
-    wishlist_items = [item['product'].id for item in cart.iter_wishlist()]  # ✅ get wishlist product ids
-
-    return render(request, 'store/product_detail.html', {
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    cart_items = request.session.get('cart', [])
+    wishlist_items = request.session.get('wishlist', [])
+    context = {
         'product': product,
         'cart_items': cart_items,
         'wishlist_items': wishlist_items,
-    })
-
-
-# Cart views
+    }
+    return render(request, 'store/product_detail.html', context)
 @require_POST
 def cart_add(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
     cart.add(product=product, quantity=1, update_quantity=False)
-    
-    # Show success message for "Add to Cart"
     messages.success(request, f"Added {product.name} to cart.")
-    
-    return redirect('store:product_detail', id=product.id)
-
-
+    return redirect('store:product_detail', product_id=product.id)
 def cart_remove(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
     cart.remove(product)
     messages.info(request, f"Removed {product.name} from cart")
     return redirect('store:cart_detail')
-
-
 def cart_detail(request):
     cart = Cart(request)
     return render(request, 'store/cart_detail.html', {'cart': cart})
-
-
-
-
-# Checkout & Order processing
 def checkout(request):
     cart = Cart(request)
     if len(cart) == 0:
         messages.error(request, 'Your cart is empty')
         return redirect('store:product_list')
-
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
@@ -192,19 +143,36 @@ def checkout(request):
             order.save()
             cart.clear()
             messages.success(request, f'Order #{order.id} placed successfully.')
-            return redirect('store:order_detail', order_id=order.id)
+            return redirect('store:order_detail_with_id', order_id=order.id)
+
     else:
         form = CheckoutForm(initial={'email': request.user.email if request.user.is_authenticated else ''})
     return render(request, 'store/checkout.html', {'cart': cart, 'form': form})
+@login_required
+def order_detail(request, order_id=None):
+    if request.method == 'POST' and 'cancel_order' in request.POST:
+        cancel_order_id = request.POST.get('cancel_order')
+        cancel_order = get_object_or_404(Order, id=cancel_order_id, user=request.user)
+        cancel_order.status = 'cancelled'
+        cancel_order.save()
+        messages.success(request, f"Order #{cancel_order.id} has been cancelled successfully.")
+        return redirect('store:order_detail') 
+    orders = Order.objects.filter(user=request.user).exclude(status='cancelled')
+    if order_id:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        for item in order.items.all():
+            item.total_price = item.quantity * item.price
+    else:
+        order = None
+    return render(request, 'store/order_detail.html', {
+        'orders': orders,
+        'current_order': order
+    })
+def order_success(request):
+    order_id = request.GET.get('order_id')
+    order = Order.objects.get(id=order_id)
+    return render(request, 'store/order_success.html', {'order': order})
 
-
-# Order detail
-def order_detail(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    if order.user and request.user != order.user and not request.user.is_staff:
-        messages.error(request, 'You cannot view this order.')
-        return redirect('store:product_list')
-    return render(request, 'store/order_detail.html', {'order': order})
 
 @require_POST
 def wishlist_toggle(request, product_id):
@@ -218,18 +186,16 @@ def wishlist_toggle(request, product_id):
     else:
         cart.add_to_wishlist(product)
     
-    return redirect('store:product_detail', id=product.id)
+    return redirect('store:product_detail', product_id=product.id)
 
 def wishlist_remove(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
-    cart.remove_from_wishlist(product)  # ✅ Remove item from wishlist
-    return redirect('store:wishlist_detail')  # ✅ Redirect to wishlist page
-
-# View Wishlist
+    cart.remove_from_wishlist(product) 
+    return redirect('store:wishlist_detail')
 def wishlist_detail(request):
     cart = Cart(request)
-    wishlist_items = list(cart.iter_wishlist())  # 👈 MAKE SURE THIS IS A LIST
+    wishlist_items = list(cart.iter_wishlist())  
     return render(request, 'store/wishlist_detail.html', {
         'wishlist': wishlist_items
     })
@@ -238,9 +204,5 @@ def wishlist_detail(request):
 def buy_now(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
-    
-    # Adding the product to the cart with quantity = 1 (or you can get it from the request)
     cart.add(product=product, quantity=1, update_quantity=False)
-    
-    # Redirecting to checkout page immediately
     return redirect('store:checkout')
